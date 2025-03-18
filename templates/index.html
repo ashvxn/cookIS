@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi Camera Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .video-container {
+            margin: 20px auto;
+            max-width: 800px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+            padding: 10px;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi Camera Stream</h1>
+    
+    <div class="video-container">
+        <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+    </div>
+    
+    <div class="status">
+        <p>Stream Status: <span id="connection-status">Connected</span></p>
+    </div>
+    
+    <script>
+        // Optional: Add JavaScript to monitor connection status
+        const img = document.querySelector('img');
+        const status = document.getElementById('connection-status');
+        
+        img.onerror = function() {
+            status.textContent = 'Disconnected';
+            status.style.color = 'red';
+        };
+        
+        img.onload = function() {
+            status.textContent = 'Connected';
+            status.style.color = 'green';
+        };
+    </script>
+</body>
+</html>
