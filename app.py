@@ -29,6 +29,14 @@ def chat():
     data = request.get_json()
     user_input = data.get("message", "")
     
+    # Handle ingredient detection updates
+    if "ingredients" in data:
+        new_ingredients = data.get("ingredients", [])
+        # Update the ingredients_detected list with new ingredients
+        for ingredient in new_ingredients:
+            if ingredient not in session["ingredients_detected"]:
+                session["ingredients_detected"].append(ingredient)
+    
     if user_input.lower() == "start session":
         session = {
             "status": "active",
@@ -43,20 +51,21 @@ def chat():
         session["status"] = "inactive"
         return jsonify({"response": "Cooking session closed."})
     
-    
     context_warning = check_context(user_input)
     
+    chat_history = "\n".join(session["chef_commands"])
     
-    chat_history = "\n".join(session["chef_commands"])  
-    model_prompt = f"Past Commands: {chat_history}\nCurrent Question: {user_input}"
-    response = ollama.chat(model="llama3:8b", messages=[{"role": "user", "content": model_prompt}])
+    # Include detected ingredients in the prompt to provide context to the model
+    ingredients_context = "Ingredients detected: " + ", ".join(session["ingredients_detected"]) if session["ingredients_detected"] else "No ingredients detected yet."
+    
+    model_prompt = f"Past Commands: {chat_history}\nIngredients: {ingredients_context}\nCurrent Question: {user_input}"
+    response = ollama.chat(model="llama3.1:latest", messages=[{"role": "user", "content": model_prompt}])
     model_reply = response["message"]["content"]
     
-
     session["chef_commands"].append(user_input)
     session["system_responses"].append(model_reply)
-    
+    print(context_warning + model_reply)
     return jsonify({"response": context_warning + model_reply})
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Run on local network with a custom port (e.g., 5001)
+    app.run(host="0.0.0.0", port=5001, debug=True)
